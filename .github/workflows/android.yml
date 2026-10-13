@@ -15,19 +15,21 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
       - name: Build debug APK
         run: gradle assembleDebug --no-daemon
       - name: Prepare APK download
-        run: cp app/build/outputs/apk/debug/app-debug.apk outil-pliage-v1-debug.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk outil-pliage-v3-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: outil-pliage-v1-apk
-          path: outil-pliage-v1-debug.apk
+          name: outil-pliage-v3-apk
+          path: outil-pliage-v3-debug.apk
       - name: Publish APK in GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "build-${{ github.run_number }}" outil-pliage-v1-debug.apk --title "Outil Pliage - build ${{ github.run_number }}" --notes "APK de test Android (debug), generee automatiquement depuis main. Pour installation personnelle ; non signee pour distribution publique." --prerelease --target "${{ github.sha }}"
+          gh release create "build-${{ github.run_number }}" outil-pliage-v3-debug.apk --title "Outil Pliage - build ${{ github.run_number }}" --notes "APK de test Android (debug), generee automatiquement depuis main. Pour installation personnelle ; non signee pour distribution publique." --prerelease --target "${{ github.sha }}"
