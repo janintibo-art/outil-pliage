@@ -9,6 +9,13 @@
 .solver-result button{width:100%;text-align:left;padding:12px;border:1px solid #3a6979;border-radius:12px;background:#132b40;color:#fff}
 .solver-result small{display:block;color:#a8c8d4;margin-top:5px}
 .solver-note{font-size:12px;color:#c4d9e2}
+
+.field-cases{border:1px solid #345a6d;border-radius:16px;background:linear-gradient(145deg,#173246,#101f32);padding:14px;margin:4px 0 18px}
+.field-cases h2{margin:0 0 6px}.case-meta{font-size:12px;color:#a8cbd6;margin-bottom:9px}
+.case-list{display:grid;gap:9px}.case-entry{display:block;border:1px solid #365b70;border-radius:12px;background:#0c2337;padding:12px;color:#e8f4f8;text-decoration:none}
+.case-entry b{display:block}.case-entry span{font-size:12px;color:#adc4d4;display:block;margin:4px 0}.case-entry small{color:#65e3c2;font-weight:bold}
+.case-note{font-size:12px;color:#b7ccda;margin:10px 0 0}
+@media(min-width:740px){.case-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><header><div class="brand"><div class="mark">∠</div><div><h1>OUTIL PLIAGE</h1><div class="subtitle">L’atelier des pliages impossibles</div></div></div><input class="search" id="q" placeholder="Ex. anneau, bord roulé, pli en Z, boîte profonde, grand rayon…" oninput="render()"></header><main><div class="stats"><span class="tag" id="count"></span><span class="tag" id="specialCount"></span><span class="tag">Catalogue accessible hors ligne</span><span class="tag">Liens fournisseurs en ligne</span></div><section class="solver" id="solver">
 <h2>🔎 Trouver une solution de fabrication</h2>
 <p>Décris la pièce qui te bloque. L'application propose des <b>pistes d'outillage</b>, sans supposer qu'elles sont déjà compatibles avec ta machine.</p>
@@ -20,7 +27,7 @@
 </div>
 <button class="btn primary" onclick="findSolutions()">Rechercher des pistes →</button>
 <div id="solverResults" aria-live="polite"></div>
-</section><div class="filters" id="filters"></div><div class="grid" id="grid"></div><div class="bottom">Dessins explicatifs simplifiés, non cotés. Les références, photos réelles, disponibilités et compatibilités TRUMPF / AMADA doivent être confirmées avant achat ou fabrication. Les outils spéciaux d’usineur sont fournis comme pistes techniques, souvent à faire fabriquer sur mesure.</div></main><button class="fab" onclick="editItem()">＋ Ma fiche</button><section id="details"></section><section id="editor"><div class="topbar"><button class="btn" onclick="closeEditor()">← Retour</button><b>Nouvelle fiche personnelle</b></div><p>Enregistrez vos outils, idées atelier et photographies par URL. Ces données restent sur cet appareil.</p><label>Nom de l'outil<input id="newName" placeholder="Ex. Outil spécial grand rayon R40"></label><label>Catégorie<select id="newCat"></select></label><label>Problème résolu<textarea id="newIssue"></textarea></label><label>Description et précautions<textarea id="newDesc"></textarea></label><label>URL de photographie (facultatif)<input id="newPhoto" placeholder="https://..."></label><label>URL fabricant, usineur ou fournisseur<input id="newUrl" placeholder="https://..."></label><button class="btn primary" onclick="saveItem()">Enregistrer ma fiche</button></section><script>
+</section><div class="filters" id="filters"></div><section class="field-cases"><h2>📷 Exemples réels d'outillages spéciaux</h2><p>Des fabricants présentent des photographies et des cas concrets sur leurs pages. Ouvre chaque exemple pour voir les outils réels et demander une étude ou un devis.</p><div class="case-list" id="realCases"></div><p class="case-note">Les photos restent sur les sites des fabricants : aucune image n'est attribuée à un modèle sans correspondance vérifiée. Le lien ne signifie pas que l'outil est disponible immédiatement ni compatible avec TRUMPF ou AMADA.</p></section><div class="grid" id="grid"></div><div class="bottom">Dessins explicatifs simplifiés, non cotés. Les références, photos réelles, disponibilités et compatibilités TRUMPF / AMADA doivent être confirmées avant achat ou fabrication. Les outils spéciaux d’usineur sont fournis comme pistes techniques, souvent à faire fabriquer sur mesure.</div></main><button class="fab" onclick="editItem()">＋ Ma fiche</button><section id="details"></section><section id="editor"><div class="topbar"><button class="btn" onclick="closeEditor()">← Retour</button><b>Nouvelle fiche personnelle</b></div><p>Enregistrez vos outils, idées atelier et photographies par URL. Ces données restent sur cet appareil.</p><label>Nom de l'outil<input id="newName" placeholder="Ex. Outil spécial grand rayon R40"></label><label>Catégorie<select id="newCat"></select></label><label>Problème résolu<textarea id="newIssue"></textarea></label><label>Description et précautions<textarea id="newDesc"></textarea></label><label>URL de photographie (facultatif)<input id="newPhoto" placeholder="https://..."></label><label>URL fabricant, usineur ou fournisseur<input id="newUrl" placeholder="https://..."></label><button class="btn primary" onclick="saveItem()">Enregistrer ma fiche</button></section><script>
 const suppliers={WILA:'https://www.wilatooling.com/products/press-brake-tooling/',TRUMPF:'https://www.trumpf.com/en_INT/products/services/services-machines-systems-and-lasers/tools/bending-tools/',AMADA:'https://www.amada.eu/',Mate:'https://www.mate.com/products/press-brake-tooling/',Wilson:'https://wilsontool.com/en-us/resources?pt=productType.Bending&rt=resourceType.Catalogs'};
 const families=[
 ['Poinçon droit 88° / 90°','Poinçons','Pliage courant de tôle','Outil standard pour plis accessibles; vérifier hauteur utile, angle et rayon en pointe.','standard angle'],
@@ -149,5 +156,18 @@ function findSolutions(){
  destination.innerHTML=`<p class="solver-note">${ranked.length} pistes issues du catalogue, classées par correspondance avec ta description. Ce classement n'est pas une preuve de faisabilité.${machine!=='indefini'?' Compatibilité '+esc(machine)+' à vérifier.':''}</p>`+ranked.map(({i})=>`<div class="solver-result"><button onclick="show('${i.id}')"><b>${esc(i.name)}</b><small>${esc(i.issue)} · ${i.cat==='Usineur'?'Outillage sur mesure à étudier':'Solution à vérifier'}</small></button></div>`).join('')+'<p class="solver-note">Une étude d’outillage doit confirmer les efforts, les risques de collision, l’extraction et les caractéristiques de la presse.</p>';
 }
 
+
+const documentedCases=[
+ {name:'Outils de charnière et profils spéciaux',company:'Sinlid',detail:'Exemples illustrés : outils de charnière, pli décalé, rabattage et formage.',url:'https://www.sinlid.com/special-press-brake-tooling/'},
+ {name:'Pliage en U très étroit',company:'Gunnarpress',detail:'Exemples photographiés : outils de U avec éjection et formes rapprochées.',url:'https://www.gunnarpress.com/u-bending-tools/'},
+ {name:'Matrices spéciales et formage en une frappe',company:'COVO',detail:'Cas présentés en images, pièces complexes et études sur mesure.',url:'https://www.chinacovo.com/?lang=fr'},
+ {name:'Matrices mobiles anti-marques',company:'Vistmac',detail:'Photographies de matrices à éléments pivotants et comparaison avec un V traditionnel.',url:'https://www.vistmac.com/custom-press-brake-tooling/'},
+ {name:'Poinçons et matrices hors standard',company:'Plasmet',detail:'Exemples de conception et de fabrication d’outils spéciaux.',url:'https://plasmet.net/en/special-tooling/'},
+ {name:'Formage complexe sur pièces industrielles',company:'Northeast Laser',detail:'Pièces réelles photographiées : nervures, décalages, grands rayons et outillage sur mesure.',url:'https://www.nelaserinc.com/press-brake-forming-metal/'},
+ {name:'Ferrures, nervures, pliage U et formage spécial',company:'AE Tooling',detail:'Présente des applications personnalisées : charnières, U, roulage, nervures et pliage de tubes.',url:'https://www.aetooling.com/'}
+];
+function showRealCases(){const el=document.getElementById('realCases');if(!el)return;el.innerHTML=documentedCases.map(x=>`<a class="case-entry" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><b>${esc(x.name)}</b><span>${esc(x.detail)}</span><small>↗ Voir les photos chez ${esc(x.company)}</small></a>`).join('')}
+
+showRealCases();
 render();
 </script></body></html>
